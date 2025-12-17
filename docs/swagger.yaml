@@ -1,0 +1,1859 @@
+basePath: /api
+definitions:
+  models.BatchCreateTaskRequest:
+    properties:
+      tasks:
+        items:
+          $ref: '#/definitions/models.CreateTaskRequest'
+        type: array
+    required:
+    - tasks
+    type: object
+  models.ChangePasswordRequest:
+    properties:
+      new_password:
+        example: newpass123
+        type: string
+      old_password:
+        example: oldpass123
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  models.CreateTaskRequest:
+    properties:
+      consume_jingdou:
+        example: 100
+        type: integer
+      execute_count:
+        example: 10
+        type: integer
+      keyword:
+        example: 手机
+        type: string
+      priority:
+        example: 1
+        type: integer
+      remark:
+        example: 测试任务
+        type: string
+      shop_name:
+        example: 京东自营店
+        type: string
+      sku:
+        example: "100001234567"
+        type: string
+      start_time:
+        example: "2023-12-01T10:00:00Z"
+        type: string
+      task_type:
+        example: search_order
+        type: string
+    required:
+    - consume_jingdou
+    - execute_count
+    - sku
+    - start_time
+    - task_type
+    type: object
+  models.CreateTaskTypeRequest:
+    properties:
+      is_active:
+        example: true
+        type: boolean
+      jingdou_price:
+        example: 2
+        type: integer
+      type_code:
+        example: add_to_cart
+        type: string
+      type_name:
+        example: 加购
+        type: string
+    required:
+    - jingdou_price
+    - type_code
+    - type_name
+    type: object
+  models.Device:
+    properties:
+      created_at:
+        type: string
+      device_id:
+        type: string
+      device_name:
+        type: string
+      id:
+        type: integer
+      ip:
+        type: string
+      is_blocked:
+        type: boolean
+      last_active:
+        type: string
+      last_heartbeat:
+        type: string
+      last_task_time:
+        type: string
+      os_info:
+        type: string
+      status:
+        type: string
+      version:
+        type: string
+    type: object
+  models.LoginRequest:
+    properties:
+      password:
+        example: password123
+        type: string
+      username:
+        example: testuser
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.LoginResponse:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIs...
+        type: string
+      expires:
+        example: 1625097600000
+        type: integer
+      id:
+        example: 1
+        type: integer
+      nickname:
+        example: 测试用户
+        type: string
+      refresh_token:
+        example: eyJhbGciOiJIUzI1NiIs...
+        type: string
+      role:
+        example: common
+        type: string
+      username:
+        example: testuser
+        type: string
+    type: object
+  models.RegisterRequest:
+    properties:
+      nickname:
+        example: 测试用户
+        type: string
+      password:
+        example: password123
+        type: string
+      username:
+        example: testuser
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.UpdateTaskRequest:
+    properties:
+      execute_count:
+        example: 20
+        type: integer
+      keyword:
+        example: 新关键词
+        type: string
+      priority:
+        example: 2
+        type: integer
+      remark:
+        example: 更新备注
+        type: string
+      shop_name:
+        example: 新店铺名称
+        type: string
+      start_time:
+        example: "2023-12-01T10:00:00Z"
+        type: string
+      status:
+        example: running
+        type: string
+    type: object
+  models.UpdateTaskTypeRequest:
+    properties:
+      is_active:
+        example: false
+        type: boolean
+      jingdou_price:
+        example: 3
+        type: integer
+      type_name:
+        example: 新名称
+        type: string
+    type: object
+  models.User:
+    properties:
+      api_key:
+        type: string
+      avatar:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      jingdou_balance:
+        type: integer
+      last_login:
+        type: string
+      nickname:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      code:
+        example: 0
+        type: integer
+      data: {}
+      msg:
+        example: 操作成功
+        type: string
+    type: object
+host: localhost:5001
+info:
+  contact:
+    email: support@jdtask.com
+    name: API Support
+  description: JD任务平台后端API服务 - Go语言实现版本
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: JD任务平台 API
+  version: "1.0"
+paths:
+  /apikey:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的API密钥，如果不存在则创建
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取API密钥
+      tags:
+      - API密钥
+  /apikey/logs:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的API调用记录
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 接口端点
+        in: query
+        name: endpoint
+        type: string
+      - description: 状态
+        enum:
+        - success
+        - failed
+        in: query
+        name: status
+        type: string
+      - description: 开始日期
+        format: date
+        in: query
+        name: start_date
+        type: string
+      - description: 结束日期
+        format: date
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取API调用记录
+      tags:
+      - API密钥
+  /apikey/refresh:
+    post:
+      consumes:
+      - application/json
+      description: 重新生成用户的API密钥
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 刷新API密钥
+      tags:
+      - API密钥
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户登录获取访问令牌
+      parameters:
+      - description: 登录信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.LoginResponse'
+              type: object
+        "401":
+          description: 用户名或密码错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 用户登录
+      tags:
+      - 认证模块
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: 用户登出（前端清除Token）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登出成功
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 用户登出
+      tags:
+      - 认证模块
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: 使用刷新令牌获取新的访问令牌
+      parameters:
+      - description: 刷新令牌
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 刷新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties: true
+                  type: object
+              type: object
+        "401":
+          description: 令牌无效
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 刷新访问令牌
+      tags:
+      - 认证模块
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 注册新用户账号
+      parameters:
+      - description: 注册信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 注册成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties: true
+                  type: object
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 用户注册
+      tags:
+      - 认证模块
+  /dashboard/future-trends:
+    get:
+      consumes:
+      - application/json
+      description: 获取未来7天的任务和京豆消耗预测
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取未来趋势数据
+      tags:
+      - 仪表板模块
+  /dashboard/overview:
+    get:
+      consumes:
+      - application/json
+      description: 获取系统概览数据，包括用户、任务、设备总数
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取概览数据
+      tags:
+      - 仪表板模块
+  /dashboard/stat/details:
+    get:
+      consumes:
+      - application/json
+      description: 获取系统详细统计数据，包括趋势、分布等（仅管理员）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取详细统计数据
+      tags:
+      - 仪表板模块
+  /dashboard/statistics:
+    get:
+      consumes:
+      - application/json
+      description: 获取详细的统计数据，包括任务状态、设备状态等
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取统计数据
+      tags:
+      - 仪表板模块
+  /devices:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有设备列表，支持分页（仅管理员）
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取设备列表
+      tags:
+      - 设备模块
+  /devices/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 根据ID获取设备详细信息（仅管理员）
+      parameters:
+      - description: 设备ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Device'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取设备详情
+      tags:
+      - 设备模块
+  /devices/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: 更新设备的封禁状态（仅管理员）
+      parameters:
+      - description: 设备ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 状态信息
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            is_blocked:
+              type: boolean
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新设备状态
+      tags:
+      - 设备模块
+  /devices/clear-all:
+    post:
+      consumes:
+      - application/json
+      description: 清空所有设备记录（仅管理员）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 清空所有设备
+      tags:
+      - 设备模块
+  /devices/request-task:
+    post:
+      consumes:
+      - application/json
+      description: 设备请求待执行的任务
+      parameters:
+      - description: 设备ID
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            device_id:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 设备请求任务
+      tags:
+      - 设备模块
+  /devices/statistics:
+    get:
+      consumes:
+      - application/json
+      description: 获取设备统计数据（仅管理员）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取设备统计信息
+      tags:
+      - 设备模块
+  /devices/task-feedback:
+    post:
+      consumes:
+      - application/json
+      description: 设备提交任务执行结果
+      parameters:
+      - description: 反馈信息
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            device_id:
+              type: string
+            message:
+              type: string
+            status:
+              type: string
+            task_id:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 任务执行反馈
+      tags:
+      - 设备模块
+  /jingdou/balance:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的京豆余额
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取京豆余额
+      tags:
+      - 京豆模块
+  /jingdou/balance/apikey:
+    get:
+      consumes:
+      - application/json
+      description: 使用API Key获取京豆余额
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取京豆余额（API Key）
+      tags:
+      - 京豆模块
+  /jingdou/logs:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的京豆变动记录，支持分页和筛选
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 操作类型
+        enum:
+        - task
+        - recharge
+        - refund
+        - deduct
+        in: query
+        name: operation_type
+        type: string
+      - description: 开始日期
+        format: date
+        in: query
+        name: start_date
+        type: string
+      - description: 结束日期
+        format: date
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取京豆变动记录
+      tags:
+      - 京豆模块
+  /jingdou/statistics:
+    get:
+      consumes:
+      - application/json
+      description: 获取京豆统计信息，包括消耗、充值等（仅管理员）
+      parameters:
+      - description: 用户ID
+        in: query
+        name: user_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取京豆统计信息
+      tags:
+      - 京豆模块
+  /logs/apikey:
+    get:
+      consumes:
+      - application/json
+      description: 使用API Key获取API调用记录
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取API调用记录（API Key）
+      tags:
+      - API日志
+  /settings:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有系统设置（仅管理员）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取系统设置列表
+      tags:
+      - 系统设置
+  /settings/{id}:
+    put:
+      consumes:
+      - application/json
+      description: 修改单个系统设置（仅管理员）
+      parameters:
+      - description: 设置ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 设置值
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            param_value:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 修改单个设置
+      tags:
+      - 系统设置
+  /settings/batch:
+    put:
+      consumes:
+      - application/json
+      description: 批量修改系统设置（仅管理员）
+      parameters:
+      - description: 设置列表
+        in: body
+        name: settings
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 批量修改设置
+      tags:
+      - 系统设置
+  /settings/frontend:
+    get:
+      consumes:
+      - application/json
+      description: 获取前端配置信息，无需认证
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      summary: 获取前端设置
+      tags:
+      - 系统设置
+    post:
+      consumes:
+      - application/json
+      description: 保存前端配置信息（仅管理员）
+      parameters:
+      - description: 前端配置
+        in: body
+        name: config
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 保存前端设置
+      tags:
+      - 系统设置
+  /settings/init:
+    post:
+      consumes:
+      - application/json
+      description: 初始化系统默认设置（仅管理员）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 初始化默认设置
+      tags:
+      - 系统设置
+  /tasks:
+    get:
+      consumes:
+      - application/json
+      description: 获取任务列表，支持分页和筛选
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 任务状态
+        enum:
+        - waiting
+        - running
+        - completed
+        - failed
+        - cancelled
+        in: query
+        name: status
+        type: string
+      - description: 任务类型
+        in: query
+        name: task_type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取任务列表
+      tags:
+      - 任务模块
+    post:
+      consumes:
+      - application/json
+      description: 创建新任务，管理员创建不消耗京豆
+      parameters:
+      - description: 任务信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 创建任务
+      tags:
+      - 任务模块
+  /tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 根据ID删除任务
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除任务
+      tags:
+      - 任务模块
+    get:
+      consumes:
+      - application/json
+      description: 根据ID获取任务详细信息
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取任务详情
+      tags:
+      - 任务模块
+    put:
+      consumes:
+      - application/json
+      description: 更新任务的部分字段
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 任务信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新任务信息
+      tags:
+      - 任务模块
+  /tasks/{id}/cancel:
+    post:
+      consumes:
+      - application/json
+      description: 取消等待中的任务并退款京豆
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 取消任务
+      tags:
+      - 任务模块
+  /tasks/{id}/priority:
+    put:
+      consumes:
+      - application/json
+      description: 修改任务优先级（仅管理员）
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 优先级
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            priority:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 修改任务优先级
+      tags:
+      - 任务模块
+  /tasks/apikey/batch:
+    post:
+      consumes:
+      - application/json
+      description: 批量创建任务，最多100个
+      parameters:
+      - description: 批量任务信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.BatchCreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 批量创建任务
+      tags:
+      - 任务模块
+  /tasks/statistics:
+    get:
+      consumes:
+      - application/json
+      description: 获取任务统计数据，管理员可指定user_id
+      parameters:
+      - description: 用户ID（仅管理员）
+        in: query
+        name: user_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取任务统计
+      tags:
+      - 任务模块
+  /tasks/stats:
+    get:
+      consumes:
+      - application/json
+      description: 获取任务的统计信息，包括总数、运行中、等待中等
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取任务统计数据
+      tags:
+      - 任务模块
+  /tasks/types:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有可用的任务类型
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取任务类型列表
+      tags:
+      - 任务模块
+    post:
+      consumes:
+      - application/json
+      description: 创建新的任务类型（仅管理员）
+      parameters:
+      - description: 任务类型信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTaskTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建任务类型
+      tags:
+      - 任务模块
+  /tasks/types/{id}:
+    put:
+      consumes:
+      - application/json
+      description: 更新任务类型信息（仅管理员）
+      parameters:
+      - description: 任务类型ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 任务类型信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateTaskTypeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新任务类型
+      tags:
+      - 任务模块
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有用户列表（仅管理员）
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取用户列表
+      tags:
+      - 用户模块
+    post:
+      consumes:
+      - application/json
+      description: 创建新用户（仅管理员）
+      parameters:
+      - description: 用户信息
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            jingdou_balance:
+              type: integer
+            password:
+              type: string
+            role:
+              type: string
+            username:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建用户
+      tags:
+      - 用户模块
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除用户（仅管理员）
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 删除用户
+      tags:
+      - 用户模块
+    get:
+      consumes:
+      - application/json
+      description: 根据ID获取用户详细信息（仅管理员）
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取用户详情
+      tags:
+      - 用户模块
+    put:
+      consumes:
+      - application/json
+      description: 更新用户信息（仅管理员）
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 用户信息
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            is_active:
+              type: boolean
+            jingdou_balance:
+              type: integer
+            role:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新用户信息
+      tags:
+      - 用户模块
+  /users/{id}/jingdou:
+    post:
+      consumes:
+      - application/json
+      description: 充值或扣除用户京豆（仅管理员）
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 调整信息
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            amount:
+              type: integer
+            operation_type:
+              type: string
+            remark:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 调整用户京豆余额
+      tags:
+      - 用户模块
+  /users/api-key:
+    post:
+      consumes:
+      - application/json
+      description: 为当前用户生成新的API密钥
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 生成或重置API密钥
+      tags:
+      - 用户模块
+  /users/me:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前登录用户的详细信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取当前用户信息
+      tags:
+      - 用户模块
+  /users/password:
+    put:
+      consumes:
+      - application/json
+      description: 修改当前用户密码
+      parameters:
+      - description: 密码信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 修改用户密码
+      tags:
+      - 用户模块
+  /users/profile:
+    put:
+      consumes:
+      - application/json
+      description: 修改当前用户的个人资料
+      parameters:
+      - description: 个人资料
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            avatar:
+              type: string
+            nickname:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: 修改个人资料
+      tags:
+      - 用户模块
+  /users/recharge-statistics:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户充值统计信息（仅管理员）
+      parameters:
+      - description: 用户ID
+        in: query
+        name: user_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 充值统计
+      tags:
+      - 用户模块
+  /users/search:
+    get:
+      consumes:
+      - application/json
+      description: 按用户名搜索用户（仅管理员）
+      parameters:
+      - description: 关键词
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 搜索用户
+      tags:
+      - 用户模块
+securityDefinitions:
+  ApiKeyAuth:
+    description: API Key for authentication
+    in: header
+    name: X-API-KEY
+    type: apiKey
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

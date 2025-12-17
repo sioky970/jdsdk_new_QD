@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: jd-task-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: jd
+      MYSQL_USER: jduser
+      MYSQL_PASSWORD: jdpass123
+    ports:
+      - "3306:3306"
+    volumes:
+      # 数据持久化卷
+      - mysql-data:/var/lib/mysql
+      # 初始化脚本目录（如果需要）
+      # - ./mysql-init:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    command: 
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    
+volumes:
+  mysql-data:
+    # 使用命名卷确保数据持久化

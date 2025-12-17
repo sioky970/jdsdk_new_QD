@@ -1,0 +1,38 @@
+# Binaries
+jd-task-platform
+jd-task-platform.exe
+jd-task-platform-linux
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Database
+*.db
+*.sqlite
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+
+# Build
+dist/
+build/
+
+# Test
+coverage.out
+*.test
+
+# OS
+.DS_Store
+Thumbs.db
